@@ -15,6 +15,12 @@ internal struct HTML: Fragment {
 
         guard !rootElement.isSelfClosing else {
             let html = reader.characters(in: startIndex..<reader.currentIndex)
+
+            if html.first == "<", html.last == ">", !html.dropFirst().dropLast().contains(where: { $0 == ">" || $0 == "<"}),
+               rootElement.name.contains("http"), !rootElement.name.contains(where: { $0.isWhitespace }) {
+                return HTML(string: rootElement.name)
+            }
+
             return HTML(string: html)
         }
 
@@ -78,6 +84,10 @@ private extension Reader {
 
                 guard name.last != "/" else {
                     return (name.dropLast(), true)
+                }
+
+                if name.contains("http"), !name.contains(where: { $0.isWhitespace }) {
+                    return (name, true)
                 }
 
                 return (name, suffix.last == "/" || name == "!--")
